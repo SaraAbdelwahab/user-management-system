@@ -2,105 +2,44 @@ import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-import Button from '../components/common/Button';
 import UserTable from '../components/users/UserTable';
 import UserFilters from '../components/users/UserFilters';
 import UserModal from '../components/users/UserModal';
 import Pagination from '../components/ui/Pagination';
 
-import {
-  useUsers,
-  useCreateUser,
-  useUpdateUser,
-  useDeleteUser,
-} from '../hooks/useUsers';
+import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../hooks/useUsers';
 
 const Users = () => {
-  // UI state only (NOT server state)
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-  });
+  const [pagination, setPagination] = useState({ page: 1, limit: 10 });
+  const [filters, setFilters] = useState({ search: '', status: '', sortBy: 'created_at', sortOrder: 'DESC' });
+  const [modalState, setModalState] = useState({ isOpen: false, user: null });
+  const [sortConfig, setSortConfig] = useState({ key: 'created_at', direction: 'DESC' });
 
-  const [filters, setFilters] = useState({
-    search: '',
-    status: '',
-    sortBy: 'created_at',
-    sortOrder: 'DESC',
-  });
-
-  const [modalState, setModalState] = useState({
-    isOpen: false,
-    user: null,
-  });
-
-  const [sortConfig, setSortConfig] = useState({
-    key: 'created_at',
-    direction: 'DESC',
-  });
-
-  // 🔥 React Query (server state)
-  const { data, isLoading, error } = useUsers({
-    ...pagination,
-    ...filters,
-  });
-
-  const createUserMutation = useCreateUser();
-  const updateUserMutation = useUpdateUser();
-  const deleteUserMutation = useDeleteUser();
+  const { data, isLoading } = useUsers({ ...pagination, ...filters });
+  const createMutation = useCreateUser();
+  const updateMutation = useUpdateUser();
+  const deleteMutation = useDeleteUser();
 
   const users = data?.users || [];
   const paginationData = data?.pagination || {};
 
-  
-  // HANDLERS
-
-
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-    setPagination(prev => ({ ...prev, page: 1 }));
-  };
-
-  const handleSearch = () => {
-    setPagination(prev => ({ ...prev, page: 1 }));
+    setFilters((p) => ({ ...p, [key]: value }));
+    setPagination((p) => ({ ...p, page: 1 }));
   };
 
   const handleSort = (key) => {
-    const direction =
-      sortConfig.key === key && sortConfig.direction === 'ASC'
-        ? 'DESC'
-        : 'ASC';
-
+    const direction = sortConfig.key === key && sortConfig.direction === 'ASC' ? 'DESC' : 'ASC';
     setSortConfig({ key, direction });
-
-    setFilters(prev => ({
-      ...prev,
-      sortBy: key,
-      sortOrder: direction,
-    }));
+    setFilters((p) => ({ ...p, sortBy: key, sortOrder: direction }));
   };
 
-  const handlePageChange = (newPage) => {
-    setPagination(prev => ({ ...prev, page: newPage }));
-  };
-
-  const handleCreateUser = () => {
-    setModalState({ isOpen: true, user: null });
-  };
-
-  const handleEditUser = (user) => {
-    setModalState({ isOpen: true, user });
-  };
-
-  const handleDeleteUser = async (user) => {
-    if (!window.confirm(`Are you sure you want to delete ${user.fullName}?`)) {
-      return;
-    }
-
+  const handleDelete = async (user) => {
+    if (!window.confirm(`Delete ${user.fullName}? This cannot be undone.`)) return;
     try {
-      await deleteUserMutation.mutateAsync(user.id);
-      toast.success('User deleted successfully');
-    } catch (error) {
+      await deleteMutation.mutateAsync(user.id);
+      toast.success('User deleted');
+    } catch {
       toast.error('Failed to delete user');
     }
   };
@@ -108,81 +47,81 @@ const Users = () => {
   const handleModalSubmit = async (formData) => {
     try {
       if (modalState.user) {
-        await updateUserMutation.mutateAsync({
-          id: modalState.user.id,
-          data: formData,
-        });
-        toast.success('User updated successfully');
+        await updateMutation.mutateAsync({ id: modalState.user.id, data: formData });
+        toast.success('User updated');
       } else {
-        await createUserMutation.mutateAsync(formData);
-        toast.success('User created successfully');
+        await createMutation.mutateAsync(formData);
+        toast.success('User created');
       }
-
       setModalState({ isOpen: false, user: null });
-    } catch (error) {
-      toast.error(
-        error?.response?.data?.message || 'Operation failed'
-      );
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Operation failed');
     }
   };
 
-  // =========================
-  // UI
-  // =========================
-
   return (
-    <div>
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Users
-        </h1>
+    <div className="space-y-6">
 
-        <Button onClick={handleCreateUser}>
-          <Plus className="w-4 h-4 mr-2" />
+      {/* ── Header ── */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="page-title">User Management</h1>
+          <p className="page-subtitle">
+            {paginationData.total != null
+              ? `${paginationData.total} users in your system`
+              : 'Manage and monitor platform users'}
+          </p>
+        </div>
+
+        <button
+          onClick={() => setModalState({ isOpen: true, user: null })}
+          className="
+            flex items-center gap-2 px-4 py-2.5 flex-shrink-0
+            text-[13.5px] font-semibold text-white
+            bg-primary-500 hover:bg-primary-600 active:bg-primary-700
+            rounded-xl shadow-btn-primary
+            transition-all duration-150
+            focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+          "
+        >
+          <Plus className="w-4 h-4" strokeWidth={2.5} />
           Add User
-        </Button>
+        </button>
       </div>
 
-      {/* FILTERS */}
+      {/* ── Filters ── */}
       <UserFilters
         filters={filters}
         onFilterChange={handleFilterChange}
-        onSearch={handleSearch}
+        onSearch={() => setPagination((p) => ({ ...p, page: 1 }))}
       />
 
-      {/* TABLE */}
+      {/* ── Table ── */}
       <UserTable
         users={users}
         loading={isLoading}
-        onEdit={handleEditUser}
-        onDelete={handleDeleteUser}
+        onEdit={(user) => setModalState({ isOpen: true, user })}
+        onDelete={handleDelete}
         onSort={handleSort}
         sortConfig={sortConfig}
       />
 
-      {/* PAGINATION */}
+      {/* ── Pagination ── */}
       {paginationData.totalPages > 1 && (
-        <div className="mt-6">
-          <Pagination
-            currentPage={paginationData.page}
-            totalPages={paginationData.totalPages}
-            onPageChange={handlePageChange}
-          />
-        </div>
+        <Pagination
+          currentPage={paginationData.page}
+          totalPages={paginationData.totalPages}
+          onPageChange={(p) => setPagination((prev) => ({ ...prev, page: p }))}
+        />
       )}
 
-      {/* MODAL */}
+      {/* ── Modal ── */}
       <UserModal
         isOpen={modalState.isOpen}
-        onClose={() =>
-          setModalState({ isOpen: false, user: null })
-        }
+        onClose={() => setModalState({ isOpen: false, user: null })}
         onSubmit={handleModalSubmit}
         user={modalState.user}
-        title={
-          modalState.user ? 'Edit User' : 'Create New User'
-        }
+        title={modalState.user ? 'Edit User' : 'Create New User'}
       />
     </div>
   );

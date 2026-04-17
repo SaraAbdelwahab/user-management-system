@@ -1,65 +1,69 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Button from '../common/Button';
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisible = 5;
-    
-    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    let end = Math.min(totalPages, start + maxVisible - 1);
-    
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-    
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
-    }
-    
-    return pages;
+  const getPages = () => {
+    const max = 5;
+    let start = Math.max(1, currentPage - Math.floor(max / 2));
+    let end   = Math.min(totalPages, start + max - 1);
+    if (end - start + 1 < max) start = Math.max(1, end - max + 1);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
   };
+
+  const navBtn = `
+    inline-flex items-center justify-center h-8 min-w-[2rem] px-2.5 text-[13px] font-medium
+    rounded-lg border transition-all duration-150 focus:outline-none
+  `;
 
   return (
     <div className="flex items-center justify-between">
-      <p className="text-sm text-gray-700">
-        Page <span className="font-medium">{currentPage}</span> of{' '}
-        <span className="font-medium">{totalPages}</span>
+
+      {/* Info */}
+      <p className="text-[13px] text-gray-500">
+        Page <span className="font-semibold text-gray-900">{currentPage}</span>
+        {' '}of{' '}
+        <span className="font-semibold text-gray-900">{totalPages}</span>
       </p>
-      
-      <div className="flex space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={currentPage === 1}
+
+      {/* Controls */}
+      <div className="flex items-center gap-1">
+
+        <button
           onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`${navBtn} gap-1 border-slate-200 text-gray-600 bg-white
+            hover:bg-slate-50 hover:border-slate-300 shadow-xs
+            disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none`}
         >
-          <ChevronLeft className="w-4 h-4" />
-          Previous
-        </Button>
-        
-        <div className="hidden sm:flex space-x-1">
-          {getPageNumbers().map((page) => (
-            <Button
+          <ChevronLeft className="w-3.5 h-3.5" strokeWidth={2.5} />
+          <span className="hidden sm:inline">Prev</span>
+        </button>
+
+        <div className="hidden sm:flex items-center gap-1">
+          {getPages().map((page) => (
+            <button
               key={page}
-              variant={page === currentPage ? 'primary' : 'outline'}
-              size="sm"
               onClick={() => onPageChange(page)}
+              className={`${navBtn}
+                ${page === currentPage
+                  ? 'bg-primary-500 border-primary-500 text-white shadow-btn-primary'
+                  : 'bg-white border-slate-200 text-gray-600 hover:bg-slate-50 hover:border-slate-300 shadow-xs'
+                }`}
             >
               {page}
-            </Button>
+            </button>
           ))}
         </div>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={currentPage === totalPages}
+
+        <button
           onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className={`${navBtn} gap-1 border-slate-200 text-gray-600 bg-white
+            hover:bg-slate-50 hover:border-slate-300 shadow-xs
+            disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none`}
         >
-          Next
-          <ChevronRight className="w-4 h-4" />
-        </Button>
+          <span className="hidden sm:inline">Next</span>
+          <ChevronRight className="w-3.5 h-3.5" strokeWidth={2.5} />
+        </button>
       </div>
     </div>
   );

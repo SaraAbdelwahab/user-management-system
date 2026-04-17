@@ -1,35 +1,34 @@
-import { ChevronUp, ChevronDown } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 
 export const Table = ({ children, className = '' }) => (
   <div className="overflow-x-auto">
-    <table className={`min-w-full divide-y divide-gray-200 ${className}`}>
-      {children}
-    </table>
+    <table className={`min-w-full ${className}`}>{children}</table>
   </div>
 );
 
 export const TableHeader = ({ columns, sortConfig, onSort }) => {
-  const getSortIcon = (column) => {
-    if (sortConfig?.key !== column) return null;
-    return sortConfig.direction === 'asc' ? 
-      <ChevronUp className="w-4 h-4" /> : 
-      <ChevronDown className="w-4 h-4" />;
+  const SortIcon = ({ col }) => {
+    if (!col.sortable) return null;
+    if (sortConfig?.key !== col.key)
+      return <ChevronsUpDown className="w-3.5 h-3.5 text-gray-300" />;
+    return sortConfig.direction === 'ASC'
+      ? <ChevronUp className="w-3.5 h-3.5 text-primary-500" />
+      : <ChevronDown className="w-3.5 h-3.5 text-primary-500" />;
   };
 
   return (
-    <thead className="bg-gray-50">
-      <tr>
-        {columns.map((column) => (
+    <thead>
+      <tr className="border-b border-gray-100">
+        {columns.map((col) => (
           <th
-            key={column.key}
-            onClick={() => column.sortable && onSort(column.key)}
-            className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-              column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
-            }`}
+            key={col.key}
+            onClick={() => col.sortable && onSort(col.key)}
+            className={`px-5 py-3.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider
+              ${col.sortable ? 'cursor-pointer hover:text-gray-900 select-none' : ''}`}
           >
-            <div className="flex items-center space-x-1">
-              <span>{column.label}</span>
-              {column.sortable && getSortIcon(column.key)}
+            <div className="flex items-center gap-1.5">
+              {col.label}
+              <SortIcon col={col} />
             </div>
           </th>
         ))}
@@ -39,22 +38,18 @@ export const TableHeader = ({ columns, sortConfig, onSort }) => {
 };
 
 export const TableBody = ({ children }) => (
-  <tbody className="bg-white divide-y divide-gray-200">
-    {children}
-  </tbody>
+  <tbody className="divide-y divide-gray-50">{children}</tbody>
 );
 
 export const TableRow = ({ children, onClick, className = '' }) => (
-  <tr 
+  <tr
     onClick={onClick}
-    className={`hover:bg-gray-50 ${onClick ? 'cursor-pointer' : ''} ${className}`}
+    className={`hover:bg-slate-50 transition-colors duration-100 ${onClick ? 'cursor-pointer' : ''} ${className}`}
   >
     {children}
   </tr>
 );
 
 export const TableCell = ({ children, className = '' }) => (
-  <td className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 ${className}`}>
-    {children}
-  </td>
+  <td className={`px-5 py-4 text-sm text-gray-900 ${className}`}>{children}</td>
 );

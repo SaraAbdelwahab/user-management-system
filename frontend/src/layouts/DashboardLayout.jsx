@@ -7,27 +7,18 @@ const DashboardLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="h-screen flex bg-[#0b0f19] text-white overflow-hidden">
+    <div className="h-screen flex bg-slate-50 overflow-hidden">
+      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
 
-      {/* Sidebar */}
-      <Sidebar collapsed={collapsed} />
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+        <Navbar onToggleSidebar={() => setCollapsed(!collapsed)} />
 
-      {/* Main */}
-      <div className="flex flex-col flex-1 min-w-0">
-
-        {/* Navbar */}
-        <Navbar
-          collapsed={collapsed}
-          onToggleSidebar={() => setCollapsed(!collapsed)}
-        />
-
-        {/* Content */}
-        <main className="flex-1 overflow-y-auto px-8 py-6 bg-[#0b0f19]">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 overflow-y-auto">
+          {/* Generous padding — Stripe uses ~40px horizontal, 32px vertical */}
+          <div className="px-8 py-8 max-w-screen-xl mx-auto w-full">
             <Outlet />
           </div>
         </main>
-
       </div>
     </div>
   );

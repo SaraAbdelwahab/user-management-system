@@ -1,21 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ─────────────────────────────────────────
+   BASE
+───────────────────────────────────────── */
 @layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
   body {
-    @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white;
+    @apply bg-slate-50 text-gray-900;
+    min-height: 100vh;
+  }
+
+  /* Remove default button/input outlines — we handle focus ourselves */
+  button, input, select, textarea {
+    font-family: inherit;
   }
 }
 
+/* ─────────────────────────────────────────
+   DESIGN SYSTEM COMPONENTS
+───────────────────────────────────────── */
 @layer components {
-  /* Custom dark mode styles */
-  .card {
-    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
-    rounded-lg shadow-sm hover:shadow-md transition;
 
+  /* ── Cards ── */
+  .card {
+    @apply bg-white border border-gray-100 rounded-2xl shadow-card;
   }
+  .card-interactive {
+    @apply card transition-all duration-200 hover:shadow-card-md hover:-translate-y-px cursor-pointer;
+  }
+
+  /* ── Page typography ── */
+  .page-title {
+    @apply text-[1.375rem] font-semibold text-gray-900 tracking-[-0.02em] leading-tight;
+  }
+  .page-subtitle {
+    @apply text-sm text-gray-500 mt-1 leading-relaxed;
+  }
+  .section-title {
+    @apply text-sm font-semibold text-gray-900 leading-tight;
+  }
+  .section-subtitle {
+    @apply text-xs text-gray-400 mt-0.5;
+  }
+  .label-caps {
+    @apply text-[0.6875rem] font-semibold text-gray-400 uppercase tracking-[0.06em];
+  }
+
+  /* ── Form inputs ── */
+  .input-base {
+    @apply w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 bg-white
+           text-gray-900 placeholder:text-gray-400
+           transition-all duration-150
+           focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-400
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .input-error {
+    @apply border-red-300 bg-red-50/50 focus:ring-red-500/20 focus:border-red-400;
+  }
+  .input-icon-left {
+    @apply pl-10;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-semibold rounded-xl
+           transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed select-none;
+  }
+  .btn-sm  { @apply btn text-xs px-3 py-1.5; }
+  .btn-md  { @apply btn text-sm px-4 py-2.5; }
+  .btn-lg  { @apply btn text-sm px-5 py-3; }
+
   .btn-primary {
-  @apply px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition;
+    @apply bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700
+           focus:ring-primary-500 shadow-btn-primary;
+  }
+  .btn-secondary {
+    @apply bg-white text-gray-700 border border-gray-200 hover:bg-gray-50 hover:border-gray-300
+           active:bg-gray-100 focus:ring-gray-300 shadow-xs;
+  }
+  .btn-danger {
+    @apply bg-red-500 text-white hover:bg-red-600 active:bg-red-700 focus:ring-red-500;
+  }
+  .btn-ghost {
+    @apply text-gray-600 hover:bg-gray-100 hover:text-gray-900 active:bg-gray-200 focus:ring-gray-300;
+  }
+
+  /* ── Badges ── */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+  .badge-green  { @apply badge bg-emerald-50 text-emerald-700 border border-emerald-100; }
+  .badge-gray   { @apply badge bg-gray-100 text-gray-500 border border-gray-200; }
+  .badge-blue   { @apply badge bg-primary-50 text-primary-700 border border-primary-100; }
+  .badge-violet { @apply badge bg-violet-50 text-violet-700 border border-violet-100; }
+  .badge-amber  { @apply badge bg-amber-50 text-amber-700 border border-amber-100; }
+
+  /* ── Divider ── */
+  .divider {
+    @apply border-t border-gray-100 my-4;
+  }
 }
+
+/* ─────────────────────────────────────────
+   SCROLLBAR
+───────────────────────────────────────── */
+::-webkit-scrollbar        { width: 5px; height: 5px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: #e2e8f0; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+
+/* ─────────────────────────────────────────
+   ANIMATIONS
+───────────────────────────────────────── */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.18s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.15s ease both;
 }
